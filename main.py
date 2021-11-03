@@ -68,25 +68,27 @@ class Individual:
             self.complexity = i
 
 
-    def eval_fitness(self):
-        if sum(self.phenotype) == 0: #TODO: should I have a nonzero minimum sum concentration?
+    def eval_fitness(self, environment, args):
+        if sum(self.phenotype) == 0:
             self.fitness = 0
+            print("my 0 fitness is because", self.phenotype)
         else:
-            self.fitness = 1
-
+            grn_out = np.asarray(self.phenotype)
+            diff = np.abs(grn_out - environment).sum() # maximum is num_genes_consider
+            self.fitness = 1-diff/args.num_genes_consider #TODO random network's fitness can be as high as 0.6 already!
+            print(grn_out, environment, self.fitness)
 
 def evolutionary_algorithm(args):
 
     fitness_over_time=[]
 
     population=create_pop(args)
-    envs = generate_optimum(args)
-    for env in envs:
-        print(env)
+    envs = generate_optimum(args) # create optimal environments
+    state = 0 # which environment are we living in
 
     for i in range(len(population)):
         population[i].calculate_phenotype(args)
-        population[i].eval_fitness()
+        population[i].eval_fitness(envs[state],args)
         print(population[i].phenotype)
         print(population[i].fitness)
         print(population[i].complexity)
