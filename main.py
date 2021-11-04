@@ -1,6 +1,7 @@
 import numpy as np
 import argparse
 from scipy.stats import beta
+import copy
 
 # Helper functions
 def create_pop(args):
@@ -71,27 +72,51 @@ class Individual:
     def eval_fitness(self, environment, args):
         if sum(self.phenotype) == 0:
             self.fitness = 0
-            print("my 0 fitness is because", self.phenotype)
         else:
             grn_out = np.asarray(self.phenotype)
             diff = np.abs(grn_out - environment).sum() # maximum is num_genes_consider
             self.fitness = 1-diff/args.num_genes_consider #TODO random network's fitness can be as high as 0.6 already!
-            print(grn_out, environment, self.fitness)
 
 def evolutionary_algorithm(args):
 
-    fitness_over_time=[]
+    fitness_over_time = []
 
-    population=create_pop(args)
+    population = create_pop(args)
     envs = generate_optimum(args) # create optimal environments
     state = 0 # which environment are we living in
 
-    for i in range(len(population)):
-        population[i].calculate_phenotype(args)
-        population[i].eval_fitness(envs[state],args)
-        print(population[i].phenotype)
-        print(population[i].fitness)
-        print(population[i].complexity)
+    for generation_num in range(args.num_generations):
+
+        # mutation
+        for p in population:
+            sites = np.random.choice(args.grn_size, args.mut_rate, replace=False)
+            for s in sites:
+                p.grn[s]=np.random.normal(0,1) # mean = 0, standard deviation = 1
+
+        # evaluation
+        for i in range(len(population)):
+            population[i].calculate_phenotype(args)
+            population[i].eval_fitness(envs[state],args)
+
+        # selection
+        population = sorted(population, key=lambda individual: individual.fitness, reverse=True)
+        parents = population[:args.num_parents]
+        if args.num_parents > args.pop_size/2:
+            print("error, you are selecting too many parents")
+            break
+        else:
+            kids = parents + parents # duplicate population, ie each parent has 1 kid
+            additional_kids=np.random.choice(parents, args.pop_size-len(kids), replace=True) # then for the remainding kids (if there aren't any) randomly pick x parents and duplicate those again
+            kids = kids + list(additional_kids)
+
+        population = copy.deepcopy(kids)
+
+        # record keeping
+        fitness_over_time.append(population[0].fitness) # max fitness over time
+        print(len(population))
+
+    print(fitness_over_time)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -101,6 +126,9 @@ if __name__ == "__main__":
     parser.add_argument('-pop_size', type=int, default=10, help="Population size")
     parser.add_argument('-alpha', type=float, default=10, help="Alpha for sigmoid function")
     parser.add_argument('-num_genes_consider', type=int, default=5, help="number of genes to consider in phenotype")
+    parser.add_argument('-mut_rate', type=int, default=3, help="number of sites to mutate per individual")
+    parser.add_argument('-num_generations', type=int, default=10, help="number of generations to run the experiment for")
+    parser.add_argument('-num_parents', type=int, default=5, help="number of parents during truncation selection")
 
     args = parser.parse_args()
 
