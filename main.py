@@ -16,10 +16,18 @@ def create_pop(args):
 
 def my_sigmoid(args,input_conc):
     #adapted from wanger 2014
-    sum_input = input_conc-0.5
-    x = sum_input * -args.alpha
-    output = 1/(1 + np.exp(x))
-    return output
+    if sum(input_conc) == 0:
+        return input_conc
+    else:
+        sum_input = input_conc-0.5
+        x = sum_input * -args.alpha
+        output = 1/(1 + np.exp(x))
+        return output
+
+def code_to_indx(args,mycode):
+    x=int(mycode / args.grn_size)
+    y=mycode - (x*args.grn_size)
+    return(x,y)
 
 def generate_optimum(args):
     envs = []
@@ -75,7 +83,7 @@ class Individual:
         else:
             grn_out = np.asarray(self.phenotype)
             diff = np.abs(grn_out - environment).sum() # maximum is num_genes_consider
-            self.fitness = 1-diff/args.num_genes_consider #TODO random network's fitness can be as high as 0.6 already!
+            self.fitness = (1-diff/args.num_genes_consider)**3 #TODO random network's fitness can be as high as 0.6 already!
 
 def evolutionary_algorithm(args):
 
@@ -89,9 +97,10 @@ def evolutionary_algorithm(args):
 
         # mutation
         for p in population:
-            sites = np.random.choice(args.grn_size, args.mut_rate, replace=False)
+            sites = np.random.choice(args.grn_size*args.grn_size, args.mut_rate, replace=False)
             for s in sites:
-                p.grn[s]=np.random.normal(0,1) # mean = 0, standard deviation = 1
+                x,y=code_to_indx(args,s)
+                p.grn[x][y]=np.random.normal(0,1) # mean = 0, standard deviation = 1
 
         # evaluation
         for i in range(len(population)):
@@ -100,6 +109,8 @@ def evolutionary_algorithm(args):
 
         # selection
         population = sorted(population, key=lambda individual: individual.fitness, reverse=True)
+        #print([p.fitness for p in population])
+
         parents = population[:args.num_parents]
         if args.num_parents > args.pop_size/2:
             print("error, you are selecting too many parents")
@@ -110,10 +121,11 @@ def evolutionary_algorithm(args):
             kids = kids + list(additional_kids)
 
         population = copy.deepcopy(kids)
+        #print([p.fitness for p in population])
 
         # record keeping
-        fitness_over_time.append(population[0].fitness) # max fitness over time
-        print(len(population))
+        mean_f=np.mean([i.fitness for i in population])
+        fitness_over_time.append(mean_f) # max fitness over time
 
     print(fitness_over_time)
 
