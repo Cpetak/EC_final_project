@@ -56,6 +56,7 @@ def evolutionary_algorithm(args):
     champions = []
     max_ages = []
     ave_ages = []
+    best_grns = []
 
     for gen in trange(args.num_generations):
 
@@ -94,8 +95,10 @@ def evolutionary_algorithm(args):
         parent_locs = perm[:args.truncation_size] # location of top x parents in the array of individuals
         children_locs = perm[args.truncation_size:] # location of individuals that won't survive and hence will be replaced by others' children
 
-        champions.append(state[perm[0]].detach().clone().cpu().squeeze(0).numpy()) # keeping tract of best solution
+        champions.append(state[perm[0]].detach().clone().cpu().squeeze(0).numpy()) # keeping tract of best solution's output
+        best_grns.append(pop[perm[0]].detach().clone().cpu()) # keeping tract of best solution
         wandb.log({'champions': state[perm[0]].detach().clone().cpu().squeeze(0).numpy()}, commit=False)
+        wandb.log({'best_grns': pop[perm[0]].detach().clone().cpu()}, commit=False)
 
         ages[parent_locs] += 1 # updating the ages of the individuals
         ages[children_locs] = 0
@@ -134,7 +137,7 @@ def evolutionary_algorithm(args):
         max_ages.append(ages.max().item())
         ave_ages.append(ages.mean().item())
         wandb.log({'max_ages': ages.max().item()}, commit=False)
-        wandb.log({'ave_ages': ages.max().item()}, commit=False)
+        wandb.log({'ave_ages': ages.max().item()}, commit=True)
 
 
         if gen % args.season_len == args.season_len - 1: # flip target
