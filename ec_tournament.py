@@ -90,30 +90,45 @@ def evolutionary_algorithm(args):
         wandb.log({'max_fits': fitnesses.max().item()}, commit=False)
         wandb.log({'ave_fits': fitnesses.mean().item()}, commit=False)
 
-        # Selection
-        perm = torch.argsort(fitnesses, descending=True)
-        parent_locs = perm[:args.truncation_size] # location of top x parents in the array of individuals
-        children_locs = perm[args.truncation_size:] # location of individuals that won't survive and hence will be replaced by others' children
+        # Selection, the only part changed for tournament experiments
+        winners = []
+        for t in range(int(args.num_tournaments)):
+          shuffled_idx = torch.randperm(args.pop_size, device="cuda")[:args.tournament_size] # select x number of individuals at random
+          perm = torch.argsort(fitnesses[shuffled_idx], descending=True) # sort them based on fitnesses
+          w_locs = shuffled_idx[perm[:args.num_tournament_winners]] # get parent locations
+          winners.append(w_locs)
 
-        champions.append(state[perm[0]].detach().clone().cpu().squeeze(0).numpy()) # keeping tract of best solution's output
-        best_grns.append(pop[perm[0]].detach().clone().cpu()) # keeping tract of best solution
-        wandb.log({'champions': state[perm[0]].detach().clone().cpu().squeeze(0).numpy()}, commit=False)
-        wandb.log({'best_grns': pop[perm[0]].detach().clone().cpu()}, commit=False)
+        winner_locs = torch.cat(winners, dim=0) #concat winners into 1 list
+        uni_winner_locs, counts = torch.unique(winner_locs,sorted=True,return_counts=True) #select winners, counted only once - these will be included in the next generation unchanged
+        counts = counts - 1
+        rest_winner_locs = uni_winner_locs.repeat_interleave(counts) #this is how many offspring each winner has  - i.e. mutated copies
 
-        ages[parent_locs] += 1 # updating the ages of the individuals
+        #uni_winner_locs = where individuals survive to next generation
+        #rest_winner_locs = how many kids each winner has
+
+        all_pop=torch.arange(args.pop_size, device="cuda")
+        children_l = [i for i in all_pop if i not in winner_locs]
+        children_locs = torch.stack(children_l,0) # location of individuals that won't survive OR reproduce and hence will be replaced by others' children
+
+        champions.append(state[winner_locs[0]].detach().clone().cpu().squeeze(0).numpy()) # keeping tract of best solution
+        best_grns.append(pop[winner_locs[0]].detach().clone().cpu()) # keeping tract of best solution
+        wandb.log({'champions': state[winner_locs[0]].detach().clone().cpu().squeeze(0).numpy()}, commit=False)
+        wandb.log({'best_grns': pop[winner_locs[0]].detach().clone().cpu()}, commit=False)
+
+        #uni_winner_locs = will age because those survive to the next generation
+        #children_locs = is where the kids are placed
+        ages[uni_winner_locs] += 1 # updating the ages of the individuals
         ages[children_locs] = 0
 
-        parents = pop[parent_locs].detach().clone() # access parents' matricies
-        num_child = int(args.pop_size/args.truncation_size) - 1
-        children = parents.repeat([num_child, 1, 1]) # create copies of parents
+        parents = pop[rest_winner_locs].detach().clone() # access parents' matricies, individuals that not only survive but also reproduce
 
         # Mutation
-        num_genes_mutate = int(args.grn_size*args.grn_size*len(children) * args.mut_rate)
-        mylist = torch.zeros(args.grn_size*args.grn_size*len(children), device="cuda")
+        num_genes_mutate = int(args.grn_size*args.grn_size*len(children_locs) * args.mut_rate)
+        mylist = torch.zeros(args.grn_size*args.grn_size*len(children_locs), device="cuda")
         mylist[:num_genes_mutate] = 1
-        shuffled_idx = torch.randperm(args.grn_size*args.grn_size*len(children), device="cuda")
-        mask = mylist[shuffled_idx].reshape(len(children),args.grn_size,args.grn_size) #select genes to mutate
-        children = children + (children*mask)*torch.randn(size=children.shape, device="cuda") * args.mut_size  # mutate only children only at certain genes
+        shuffled_idx = torch.randperm(args.grn_size*args.grn_size*len(children_locs), device="cuda")
+        mask = mylist[shuffled_idx].reshape(len(children_locs),args.grn_size,args.grn_size) #select genes to mutate
+        children = parents + (parents*mask) * torch.randn(size=parents.shape, device="cuda") * args.mut_size  # mutate only children only at certain genes
 
         pop[children_locs] = children # put children into population
 
@@ -154,21 +169,23 @@ if __name__ == "__main__":
     parser.add_argument('-mut_rate', type=float, default=0.1, help="rate of mutation (i.e. number of genes to mutate)")
     parser.add_argument('-mut_size', type=float, default=0.5, help="size of mutation")
     parser.add_argument('-num_generations', type=int, default=10, help="number of generations to run the experiment for") # number of generations
-    parser.add_argument('-truncation_prop', type=float, default=0.2, help="proportion of individuals selected for reproduction")
     parser.add_argument('-max_age', type=int, default=5, help="max age at which individual is replaced by its kid")
     parser.add_argument('-season_len', type=int, default=5, help="number of generations between environmental flips")
     parser.add_argument('-proj', type=str, default="EC_final_project", help="Name of the project (for wandb)")
     parser.add_argument('-exp_type', type=str, default="BASIC", help="Name your experiment for grouping")
     #parser.add_argument('-rep', type=str, default="1", help="ID of replicate")
 
+    parser.add_argument('-tournament_size', type=int, default=5, help="Number of individuals competeing in a tournament")
+    parser.add_argument('-num_tournament_winners', type=int, default=2, help="Number of individuals winning in a tournament")
+
     args = parser.parse_args()
 
     print("running code")
 
-    args.truncation_size=int(args.truncation_prop*args.pop_size)
+    args.num_tournaments = args.pop_size / args.num_tournament_winners
 
-    if args.pop_size % args.truncation_size != 0:
-      print("Error: select different trunction_prop")
+    if args.pop_size % args.num_tournament_winners != 0:
+      print("Error: select different num_tournament_winners")
       break
 
     #tag = conf2tag(vars(args))
