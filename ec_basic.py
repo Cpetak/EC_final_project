@@ -9,6 +9,7 @@ Original file is located at
 In the basic algorithm, a random number of positions will be selected based on the mutation rate and new weights will be randomly drawn from a Gaussian distribution with μ = 0, σ = 1 for those positions. Selection will be implemented as a simple truncation selection. Only children will be considered in the selection process (max_age = 1).
 
 In this notebook also: 1) Possibility of selecting parents for the next generation without aging (max_age > generations), 2) Same but with aging (generation > max_age > 1)
+Also, Possibility of crossover
 """
 
 import torch
@@ -117,6 +118,24 @@ def evolutionary_algorithm(args):
 
         pop[children_locs] = children # put children into population
 
+        # Crossover, between kids (concenptually the same as if I first did the crossover, then the mutation), otherwise same as basic model!
+        if args.crossover:
+            cpairs=torch.randperm(args.pop_size, device="cuda").reshape(int(args.pop_size/2),2)[:args.num_crossover] #create kid pairs, popsize has to be divisibale by 4
+            #cross_points = torch.randint(1,grn_size, (int(pop_size/2), num_crossover)) #get columns after which crossover occurs for each crossover event
+            cross_points = torch.randperm(args.grn_size+1, device="cuda")[:2] #for now lets just have 2 points for crossovers, same points for all individuals
+            cross_points, idxs = torch.sort(cross_points, descending=False)
+
+            mask=torch.zeros(args.grn_size).to(device)
+            mask[cross_points[0]:cross_points[1]]=1
+            mask=mask.repeat(args.grn_size,1)
+            antimask=1-mask
+
+            new_pop = torch.clone(pop)
+            for pair in cpairs:
+              new_pop[pair[0]] = pop[pair[1]]*mask + pop[pair[0]]*antimask #is the new pop[p[0]]
+              new_pop[pair[1]] = pop[pair[0]]*mask + pop[pair[1]]*antimask #is the new pop[p[1]]
+            pop = new_pop
+
         # Dying due to old age
         old_locs = torch.where(ages >= args.max_age) # get location of old individuals
 
@@ -161,9 +180,16 @@ if __name__ == "__main__":
     parser.add_argument('-exp_type', type=str, default="BASIC", help="Name your experiment for grouping")
     #parser.add_argument('-rep', type=str, default="1", help="ID of replicate")
 
+    parser.add_argument('-crossover', type=bool, default=False, help="Wether or not you want crossover")
+    parser.add_argument('-crossover_freq', type=float, default=0.5, help="number of individuals that will undergo crossover")
+
     args = parser.parse_args()
 
     print("running code")
+
+    args.num_crossover = int(args.crossover_freq * args.pop_size) #how many individuals will be involved in crossover
+    if args.num_crossover % 2 != 0:
+      print("Error: select different crossover_freq")
 
     args.truncation_size=int(args.truncation_prop*args.pop_size)
 
