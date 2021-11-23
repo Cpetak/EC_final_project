@@ -129,27 +129,27 @@ def evolutionary_algorithm(args):
 
         # Crossover, between kids (concenptually the same as if I first did the crossover, then the mutation), otherwise same as basic model!
         if args.crossover != "NO":
-            cpairs=torch.randperm(pop_size, device="cuda")[:num_crossover] #create kid pairs, num_crossover has to be divisibale by 2
+            cpairs=torch.randperm(args.pop_size, device="cuda")[:args.num_crossover] #create kid pairs, num_crossover has to be divisibale by 2
 
             if args.crossover == "twopoint":
-                random_mask_pos = torch.randperm(len(masks))[:int(num_crossover/2)] #get a random set of masks
-                masks=masks[random_mask_pos]
-                antimasks=antimasks[random_mask_pos]
+                random_mask_pos = torch.randperm(len(masks))[:int(args.num_crossover/2)] #get a random set of masks
+                mymasks=masks[random_mask_pos]
+                myantimasks=antimasks[random_mask_pos]
 
             if args.crossover == "uniform":
-                all_col = torch.arange(grn_size, device="cuda")
-                y=all_col.repeat(int(num_crossover/2),1)
+                all_col = torch.arange(args.grn_size, device="cuda")
+                y=all_col.repeat(int(args.num_crossover/2),1)
                 indices = torch.argsort(torch.rand(*y.shape), dim=-1)
                 result = y[torch.arange(y.shape[0]).unsqueeze(-1), indices] #create random permutation of column orders
 
-                masks = torch.where(result>grn_size/2, 0, 1) #make it into a 2D mask
-                masks=masks.repeat(1,grn_size).reshape(int(num_crossover/2),grn_size,grn_size)
-                antimasks = torch.where(result<=grn_size/2, 0, 1) #make inverse into a 2D mask
-                antimasks=antimasks.repeat(1,grn_size).reshape(int(num_crossover/2),grn_size,grn_size)
+                mymasks = torch.where(result>args.grn_size/2, 0, 1) #make it into a 2D mask
+                mymasks=mymasks.repeat(1,args.grn_size).reshape(int(args.num_crossover/2),args.grn_size,args.grn_size)
+                myantimasks = torch.where(result<=args.grn_size/2, 0, 1) #make inverse into a 2D mask
+                myantimasks=myantimasks.repeat(1,args.grn_size).reshape(int(args.num_crossover/2),args.grn_size,args.grn_size)
 
-            n1=pop[cpairs[int(len(cpairs)/2):]] * masks + pop[cpairs[:int(len(cpairs)/2)]] * antimasks # first cpair/2 individuals in cpairs, after crossover
-            n2=pop[cpairs[:int(len(cpairs)/2)]] * masks + pop[cpairs[int(len(cpairs)/2):]] * antimasks # second cpair/2 individuals in cpairs, after crossover
-            all_pop=torch.arange(pop_size, device="cuda")
+            n1=pop[cpairs[int(len(cpairs)/2):]] * mymasks + pop[cpairs[:int(len(cpairs)/2)]] * myantimasks # first cpair/2 individuals in cpairs, after crossover
+            n2=pop[cpairs[:int(len(cpairs)/2)]] * mymasks + pop[cpairs[int(len(cpairs)/2):]] * myantimasks # second cpair/2 individuals in cpairs, after crossover
+            all_pop=torch.arange(args.pop_size, device="cuda")
             not_crossed = [i for i in all_pop if i not in cpairs] # plus the individuals left out of crossover!!
             not_crossed_mats = pop[torch.stack(not_crossed,0)]
             new_pop = torch.cat((n1, n2, not_crossed_mats), 0)
@@ -199,7 +199,7 @@ if __name__ == "__main__":
     parser.add_argument('-exp_type', type=str, default="BASIC", help="Name your experiment for grouping")
     #parser.add_argument('-rep', type=str, default="1", help="ID of replicate")
 
-    parser.add_argument('-crossover', type=bool, default=False, help="Wether or not you want crossover")
+    parser.add_argument('-crossover', type=str, default="NO", help="Options: NO, uniform, twopoint")
     parser.add_argument('-crossover_freq', type=float, default=0.5, help="number of individuals that will undergo crossover")
 
     args = parser.parse_args()
