@@ -59,6 +59,8 @@ def evolutionary_algorithm(args):
     max_ages = []
     ave_ages = []
     best_grns = []
+    mut_rates_t = []
+    mut_sizes_t = []
 
     # create all possible masks for 2-point crossover
     if args.crossover == "twopoint":
@@ -99,6 +101,33 @@ def evolutionary_algorithm(args):
         ave_fits.append(fitnesses.mean().item()) # keeping track of average fitness
         wandb.log({'max_fits': fitnesses.max().item()}, commit=False)
         wandb.log({'ave_fits': fitnesses.mean().item()}, commit=False)
+
+        # Adaptive mut rate
+        if args.adaptive_mut:
+            # where ages == 0 -> they where born in the previous generation and haven't been modified yet but fitnesses are calculated
+            pfits = fitnesses[torch.where(ages > 0)] #fitnesses of parents
+            cfits = fitnesses[torch.where(ages == 0)] #fitnesses of children
+
+            if len(pfits) > 0 and len(cfits) > 0:
+              p_min_fitness=torch.min(pfits) # min fitness of parents
+              num_fit_children = len(cfits[torch.where(cfits > p_min_fitness)]) # number of children fitter than worse parent
+
+              if num_fit_children > (len(cfits)/5): # if more than 1/5 of children are better than worse parent -> increase learning rate as we are still far from optimum
+                #print("increase learning rate")
+                args.mut_rate += args.meta_mut_rate
+                args.mut_size += args.meta_mut_rate
+
+              if num_fit_children < (len(cfits)/5): # if less than 1/5 of children are better than worse parent -> decrease learning rate as we are close to optimum
+                #print("decrease learning rate")
+                if args.mut_rate - args.meta_mut_rate > 0:
+                    args.mut_rate -= args.meta_mut_rate
+                if args.mut_size - args.meta_mut_rate > 0:
+                    args.mut_size -= args.meta_mut_rate
+
+            mut_rates_t.append(args.mut_rate)
+            wandb.log({'mut_rates_t': args.mut_rate}, commit=False)
+            mut_sizes_t.append(args.mut_size)
+            wandb.log({'mut_sizes_t': args.mut_size}, commit=False)
 
         # Selection
         perm = torch.argsort(fitnesses, descending=True)
@@ -201,6 +230,9 @@ if __name__ == "__main__":
 
     parser.add_argument('-crossover', type=str, default="NO", help="Options: NO, uniform, twopoint")
     parser.add_argument('-crossover_freq', type=float, default=0.5, help="number of individuals that will undergo crossover")
+
+    parser.add_argument('-adaptive_mut', type=bool, default=False, help="if you want adaptive mutation rate")
+    arser.add_argument('-meta_mut_rate', type=float, default=0.01, help="how much you increase or decrease mut_size and mut_rate")
 
     args = parser.parse_args()
 
