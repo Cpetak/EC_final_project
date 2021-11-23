@@ -18,6 +18,7 @@ import argparse
 import numpy as np
 import matplotlib.pyplot as plt
 from collections import defaultdict
+from itertools import combinations
 
 device="cuda"
 
@@ -58,6 +59,14 @@ def evolutionary_algorithm(args):
     max_ages = []
     ave_ages = []
     best_grns = []
+
+    # create all possible masks for 2-point crossover
+    if args.crossover == "twopoint":
+        idxs = np.array(list(combinations(range(0, grn_size+1),2)))
+        masks = torch.zeros(len(idxs),grn_size,grn_size, device="cuda")
+        for i,(start,end) in enumerate(idxs):
+          masks[i,:,start:end] = 1
+        antimasks = 1 - masks
 
     for gen in trange(args.num_generations):
 
@@ -119,22 +128,32 @@ def evolutionary_algorithm(args):
         pop[children_locs] = children # put children into population
 
         # Crossover, between kids (concenptually the same as if I first did the crossover, then the mutation), otherwise same as basic model!
-        if args.crossover:
-            cpairs=torch.randperm(args.pop_size, device="cuda").reshape(int(args.pop_size/2),2)[:args.num_crossover] #create kid pairs, popsize has to be divisibale by 4
-            #cross_points = torch.randint(1,grn_size, (int(pop_size/2), num_crossover)) #get columns after which crossover occurs for each crossover event
-            cross_points = torch.randperm(args.grn_size+1, device="cuda")[:2] #for now lets just have 2 points for crossovers, same points for all individuals
-            cross_points, idxs = torch.sort(cross_points, descending=False)
+        if args.crossover != "NO":
+            cpairs=torch.randperm(pop_size, device="cuda")[:num_crossover] #create kid pairs, num_crossover has to be divisibale by 2
 
-            mask=torch.zeros(args.grn_size).to(device)
-            mask[cross_points[0]:cross_points[1]]=1
-            mask=mask.repeat(args.grn_size,1)
-            antimask=1-mask
+            if args.crossover == "twopoint":
+                random_mask_pos = torch.randperm(len(masks))[:int(num_crossover/2)] #get a random set of masks
+                masks=masks[random_mask_pos]
+                antimasks=antimasks[random_mask_pos]
 
-            new_pop = torch.clone(pop)
-            for pair in cpairs:
-              new_pop[pair[0]] = pop[pair[1]]*mask + pop[pair[0]]*antimask #is the new pop[p[0]]
-              new_pop[pair[1]] = pop[pair[0]]*mask + pop[pair[1]]*antimask #is the new pop[p[1]]
-            pop = new_pop
+            if args.crossover == "uniform":
+                all_col = torch.arange(grn_size, device="cuda")
+                y=all_col.repeat(int(num_crossover/2),1)
+                indices = torch.argsort(torch.rand(*y.shape), dim=-1)
+                result = y[torch.arange(y.shape[0]).unsqueeze(-1), indices] #create random permutation of column orders
+
+                masks = torch.where(result>grn_size/2, 0, 1) #make it into a 2D mask
+                masks=masks.repeat(1,grn_size).reshape(int(num_crossover/2),grn_size,grn_size)
+                antimasks = torch.where(result<=grn_size/2, 0, 1) #make inverse into a 2D mask
+                antimasks=antimasks.repeat(1,grn_size).reshape(int(num_crossover/2),grn_size,grn_size)
+
+            n1=pop[cpairs[int(len(cpairs)/2):]] * masks + pop[cpairs[:int(len(cpairs)/2)]] * antimasks # first cpair/2 individuals in cpairs, after crossover
+            n2=pop[cpairs[:int(len(cpairs)/2)]] * masks + pop[cpairs[int(len(cpairs)/2):]] * antimasks # second cpair/2 individuals in cpairs, after crossover
+            all_pop=torch.arange(pop_size, device="cuda")
+            not_crossed = [i for i in all_pop if i not in cpairs] # plus the individuals left out of crossover!!
+            not_crossed_mats = pop[torch.stack(not_crossed,0)]
+            new_pop = torch.cat((n1, n2, not_crossed_mats), 0)
+            pop=new_pop
 
         # Dying due to old age
         old_locs = torch.where(ages >= args.max_age) # get location of old individuals
