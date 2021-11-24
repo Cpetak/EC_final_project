@@ -190,7 +190,7 @@ def evolutionary_algorithm(args):
         max_ages.append(ages.max().item())
         ave_ages.append(ages.mean().item())
         wandb.log({'max_ages': ages.max().item()}, commit=False)
-        wandb.log({'ave_ages': ages.max().item()}, commit=False)
+        wandb.log({'ave_ages': ages.mean().item()}, commit=False)
 
         d=torch.mean(torch.std(pop,unbiased=False, dim=0))
         diversities.append(d)
