@@ -64,8 +64,8 @@ def evolutionary_algorithm(args):
 
     # create all possible masks for 2-point crossover
     if args.crossover == "twopoint":
-        idxs = np.array(list(combinations(range(0, grn_size+1),2)))
-        masks = torch.zeros(len(idxs),grn_size,grn_size, device="cuda")
+        idxs = np.array(list(combinations(range(0, args.grn_size+1),2)))
+        masks = torch.zeros(len(idxs),args.grn_size,args.grn_size, device="cuda")
         for i,(start,end) in enumerate(idxs):
           masks[i,:,start:end] = 1
         antimasks = 1 - masks
@@ -156,7 +156,7 @@ def evolutionary_algorithm(args):
 
         pop[children_locs] = children # put children into population
 
-        # Crossover, between kids (concenptually the same as if I first did the crossover, then the mutation), otherwise same as basic model!
+        # Crossover, between kids (concenptually the same as if I first did the crossover, then the mutation), otherwise same as basic model! parents can crossover too...
         if args.crossover != "NO":
             cpairs=torch.randperm(args.pop_size, device="cuda")[:args.num_crossover] #create kid pairs, num_crossover has to be divisibale by 2
 
