@@ -60,6 +60,8 @@ def evolutionary_algorithm(args):
     ave_ages = []
     best_grns = []
 
+    diversities = []
+
     # create all possible masks for 2-point crossover
     if args.crossover == "twopoint":
         idxs = np.array(list(combinations(range(0, grn_size+1),2)))
@@ -188,8 +190,11 @@ def evolutionary_algorithm(args):
         max_ages.append(ages.max().item())
         ave_ages.append(ages.mean().item())
         wandb.log({'max_ages': ages.max().item()}, commit=False)
-        wandb.log({'ave_ages': ages.max().item()}, commit=True)
+        wandb.log({'ave_ages': ages.max().item()}, commit=False)
 
+        d=torch.mean(torch.std(pop,unbiased=False, dim=0))
+        diversities.append(d)
+        wandb.log({'diversities': d}, commit=True)
 
         if gen % args.season_len == args.season_len - 1: # flip target
             curr_targ = (curr_targ + 1) % 2
