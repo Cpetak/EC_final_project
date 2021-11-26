@@ -122,7 +122,7 @@ def evolutionary_algorithm(args, title, folder):
             f_props = fitnesses
 
         fit_stds.append(torch.std(f_props, unbiased=False))
-        run.log({'fit_stds': torch.std(f_props, unbiased=False))
+        run.log({'fit_stds': torch.std(f_props, unbiased=False)}, commit =False)
 
         winner_locs=torch.multinomial(f_props, args.pop_size, replacement=True)
         uni_winner_locs, counts = torch.unique(winner_locs,sorted=True,return_counts=True) #select winners, counted only once - these will be included in the next generation unchanged
