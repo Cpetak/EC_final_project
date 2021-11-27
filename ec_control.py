@@ -78,7 +78,7 @@ def evolutionary_algorithm(args, title, folder):
     for gen in trange(args.num_generations):
 
         # Evaluate fitnesses
-        fitnesses = fitness_function(pop[:,:args.num_genes_fit], targs[curr_targ])
+        fitnesses = fitness_function(pop[:,:num_genes_fit], targs[curr_targ])
 
         max_fits.append(fitnesses.max().item()) # keeping track of max fitness
         ave_fits.append(fitnesses.mean().item()) # keeping track of average fitness
@@ -138,7 +138,7 @@ def evolutionary_algorithm(args, title, folder):
         stdivs=torch.std(pop, unbiased=False, dim=0) #stdiv calculcated for each position in the genome, across individuals
         diversity=stdivs.mean()
         diversities.append(diversity)
-        run.log({'diversities': d}, commit=True)
+        run.log({'diversities': diversity}, commit=True)
 
         if gen % args.season_len == args.season_len - 1: # flip target
             curr_targ = (curr_targ + 1) % 2
