@@ -1,0 +1,21 @@
+Name,num_tournament_winners,_wandb,ranked,ave_fits,stype
+num_tournament_winners: 20,20,,,16.96954155,Tournament
+num_tournament_winners: twilight-paper-7,,,,17.95836639,Truncation
+num_tournament_winners: cosmic-dawn-7,,,,17.96972656,Truncation
+num_tournament_winners: eager-bee-75,,,TRUE,14.99227238,Ranked
+num_tournament_winners: effortless-field-76,,,TRUE,14.5029459,Ranked
+num_tournament_winners: autumn-valley-5,,,,17.9780159,Truncation
+num_tournament_winners: good-haze-79,,,TRUE,15.49510002,Ranked
+num_tournament_winners: chocolate-bird-70,,,FALSE,12.50000095,Fitness
+num_tournament_winners: dulcet-river-71,,,FALSE,12.50000095,Fitness
+num_tournament_winners: eager-plant-74,,,FALSE,12.50000095,Fitness
+num_tournament_winners: clean-surf-73,,,FALSE,12.50000095,Fitness
+num_tournament_winners: 20,20,,,16.98646355,Tournament
+num_tournament_winners: 20,20,,,16.98776054,Tournament
+num_tournament_winners: kind-sound-71,,,FALSE,12.50000095,Fitness
+num_tournament_winners: 20,20,,,16.99180603,Tournament
+num_tournament_winners: 20,20,,,18.49043846,Tournament
+num_tournament_winners: visionary-voice-77,,,TRUE,14.99433231,Ranked
+num_tournament_winners: fast-lion-77,,,TRUE,14.99576283,Ranked
+num_tournament_winners: ruby-blaze-6,,,,17.97167969,Truncation
+num_tournament_winners: jolly-puddle-7,,,,16.98284721,Truncation

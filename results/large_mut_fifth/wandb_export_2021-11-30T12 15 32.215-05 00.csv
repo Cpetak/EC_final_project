@@ -1,0 +1,21 @@
+Name,large_mut_rate,_wandb,adaptive_mut,average_complexity,stype
+large_mut_rate: 0.1,0.1,,,2.994003296,lm_01
+large_mut_rate: 0.5,0.5,,,4.891998291,lm_05
+large_mut_rate: 0.5,0.5,,,2.988998413,lm_05
+large_mut_rate: 0.5,0.5,,,2.988998413,lm_05
+large_mut_rate: 0.1,0.1,,,2.906005859,lm_01
+large_mut_rate: hearty-pyramid-66,,,TRUE,2.966995239,adap
+large_mut_rate: desert-silence-69,,,TRUE,2.996002197,adap
+large_mut_rate: 0.1,0.1,,,2.001998901,lm_01
+large_mut_rate: genial-violet-66,,,TRUE,2.850997925,adap
+large_mut_rate: 0.5,0.5,,,2.244003296,lm_05
+large_mut_rate: twilight-paper-7,,,FALSE,2.970993042,control
+large_mut_rate: cosmic-dawn-7,,,FALSE,2.06300354,control
+large_mut_rate: 0.5,0.5,,,2.964996338,lm_05
+large_mut_rate: autumn-valley-5,,,FALSE,3,control
+large_mut_rate: expert-forest-65,,,TRUE,2.912994385,adap
+large_mut_rate: 0.1,0.1,,,2,lm_01
+large_mut_rate: dandy-wave-66,,,TRUE,129.2049999,adap
+large_mut_rate: ruby-blaze-6,,,FALSE,2,control
+large_mut_rate: 0.1,0.1,,,2.001998901,lm_01
+large_mut_rate: jolly-puddle-7,,,FALSE,2.00100708,control
