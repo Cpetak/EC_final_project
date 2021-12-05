@@ -1,0 +1,15 @@
+Name,adaptive_mut,_wandb,ave_fits,,,,
+adaptive_mut: true,TRUE,,21.65748405,,,,
+adaptive_mut: true,TRUE,,22.14075851,,,,
+adaptive_mut: true,TRUE,,22.44000435,,,,
+adaptive_mut: twilight-paper-7,FALSE,,17.95836639,,,,
+adaptive_mut: cosmic-dawn-7,FALSE,,17.96972656,,,,
+adaptive_mut: autumn-valley-5,FALSE,,17.9780159,,,,
+adaptive_mut: true,TRUE,,21.10400963,,,,
+adaptive_mut: true,TRUE,,17.75205994,,,,
+adaptive_mut: ruby-blaze-6,FALSE,,17.97167969,,,21.65748405,17.95836639
+adaptive_mut: jolly-puddle-7,FALSE,,16.98284721,,,22.14075851,17.96972656
+,,,,,,22.44000435,17.9780159
+,,,,,,21.10400963,17.97167969
+,,,,,,17.75205994,16.98284721
+,,,,,,21.0188633,17.77212715

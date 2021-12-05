@@ -1,0 +1,21 @@
+Name,num_tournament_winners,_wandb,ranked,diversities,,,,,,
+num_tournament_winners: 20,20,,,8.80121994,,,,,,
+num_tournament_winners: twilight-paper-7,,,,98.69112396,,,,,,
+num_tournament_winners: cosmic-dawn-7,,,,38.14994431,,,,,,
+num_tournament_winners: eager-bee-75,,,TRUE,0.002500592,,,,,,
+num_tournament_winners: effortless-field-76,,,TRUE,0.003915403,,,,,,
+num_tournament_winners: autumn-valley-5,,,,0.006969833,,,tourn,trunc,ranked,fit
+num_tournament_winners: good-haze-79,,,TRUE,0.00319545,,,8.80121994,98.69112396,0.002500592,0
+num_tournament_winners: chocolate-bird-70,,,FALSE,0,,,58.6103363,38.14994431,0.003915403,0
+num_tournament_winners: dulcet-river-71,,,FALSE,0,,,57.86276627,0.006969833,0.00319545,0
+num_tournament_winners: eager-plant-74,,,FALSE,0,,,0.130486906,0.383196533,0.002973091,0
+num_tournament_winners: clean-surf-73,,,FALSE,0,,,57.95224762,11.37700081,0.002100796,0
+num_tournament_winners: 20,20,,,58.6103363,,,,,,
+num_tournament_winners: 20,20,,,57.86276627,,,,,,
+num_tournament_winners: kind-sound-71,,,FALSE,0,,,,,,
+num_tournament_winners: 20,20,,,0.130486906,,,,,,
+num_tournament_winners: 20,20,,,57.95224762,,,,,,
+num_tournament_winners: visionary-voice-77,,,TRUE,0.002973091,,,,,,
+num_tournament_winners: fast-lion-77,,,TRUE,0.002100796,,,,,,
+num_tournament_winners: ruby-blaze-6,,,,0.383196533,,,,,,
+num_tournament_winners: jolly-puddle-7,,,,11.37700081,,,,,,

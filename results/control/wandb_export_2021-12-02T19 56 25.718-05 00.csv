@@ -1,0 +1,20 @@
+Name,control,_wandb,ave_fits,
+control: true,TRUE,,10.00004768,
+control: twilight-paper-7,,,17.95836639,
+control: cosmic-dawn-7,,,17.96972656,
+control: autumn-valley-5,,,17.9780159,
+control: true,TRUE,,10,
+control: ruby-blaze-6,,,17.97167969,
+control: true,TRUE,,11.00000095,
+control: jolly-puddle-7,,,16.98284721,
+control: true,TRUE,,16,
+control: true,TRUE,,12.00000095,
+,,,,
+,,,,
+,,,control,treatment
+,,,10.00004768,17.95836639
+,,,10,17.96972656
+,,,11.00000095,17.9780159
+,,,16,17.97167969
+,,,12.00000095,16.98284721
+,,,11.80000992,17.77212715

@@ -1,0 +1,16 @@
+Name,large_mut_rate,_wandb,ave_fits,,,,,
+large_mut_rate: 0.1,0.1,,17.95724297,,,,,
+large_mut_rate: 0.5,0.5,,19.36717415,,,,,
+large_mut_rate: 0.5,0.5,,19.39629936,,,,,
+large_mut_rate: 0.5,0.5,,19.44382477,,,A,B,C
+large_mut_rate: 0.1,0.1,,18.43461227,,,0.1,0.5,control
+large_mut_rate: 0.1,0.1,,18.47013664,,,17.95724297,19.36717415,17.95836639
+large_mut_rate: 0.5,0.5,,20.40869904,,,18.43461227,19.39629936,17.96972656
+large_mut_rate: twilight-paper-7,,,17.95836639,,,18.47013664,19.44382477,17.9780159
+large_mut_rate: cosmic-dawn-7,,,17.96972656,,,17.98019028,20.40869904,17.97167969
+large_mut_rate: 0.5,0.5,,19.91350174,,,17.48486328,19.91350174,16.98284721
+large_mut_rate: autumn-valley-5,,,17.9780159,,,,,
+large_mut_rate: 0.1,0.1,,17.98019028,,,,,
+large_mut_rate: ruby-blaze-6,,,17.97167969,,,,,
+large_mut_rate: 0.1,0.1,,17.48486328,,,,,
+large_mut_rate: jolly-puddle-7,,,16.98284721,,,,,
